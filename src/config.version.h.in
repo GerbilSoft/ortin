@@ -1,0 +1,31 @@
+/***************************************************************************
+ * Ortin (IS-NITRO management)                                             *
+ * config.version.h.in: Version information. (source file)                 *
+ *                                                                         *
+ * Copyright (c) 2020 by David Korth.                                      *
+ * SPDX-License-Identifier: GPL-2.0-or-later                               *
+ ***************************************************************************/
+
+#ifndef __ORTIN_CONFIG_VERSION_H__
+#define __ORTIN_CONFIG_VERSION_H__
+
+/* Program version. */
+#define VERSION_MAJOR @CMAKE_PROJECT_VERSION_MAJOR@
+#define VERSION_MINOR @CMAKE_PROJECT_VERSION_MINOR@
+#define VERSION_PATCH @CMAKE_PROJECT_VERSION_PATCH@
+#define VERSION_DEVEL @CMAKE_PROJECT_VERSION_TWEAK@
+#define VERSION_STRING "@VERSION_STRING@"
+
+/* Package dscription. */
+#define DESCRIPTION "@DESCRIPTION@"
+
+/* Package name. */
+#define PACKAGE_NAME "@PACKAGE_NAME@"
+
+/* Author. */
+#define AUTHOR "@AUTHOR@"
+
+/* Installation prefix. */
+#define CMAKE_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
+
+#endif /* __ORTIN_CONFIG_VERSION_H__ */

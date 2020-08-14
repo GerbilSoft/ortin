@@ -1,0 +1,18 @@
+/***************************************************************************
+ * Ortin (IS-NITRO management)                                             *
+ * config.libc.h.in: Common libc function detection. (source file)         *
+ *                                                                         *
+ * Copyright (c) 2016-2020 by David Korth.                                 *
+ * SPDX-License-Identifier: GPL-2.0-or-later                               *
+ ***************************************************************************/
+
+#ifndef __ORTIN_CONFIG_LIBC_H__
+#define __ORTIN_CONFIG_LIBC_H__
+
+/* Define to the size of `off_t` if it's available. */
+#cmakedefine SIZEOF_OFF_T @OFF_T@
+
+/* Define to the size of `off64_t` if it's available. */
+#cmakedefine SIZEOF_OFF64_T @OFF64_T@
+
+#endif /* __ORTIN_CONFIG_LIBC_H__ */
