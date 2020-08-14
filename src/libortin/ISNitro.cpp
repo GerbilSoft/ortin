@@ -402,7 +402,13 @@ int ISNitro::setAVModeSettings(const NitroAVModeSettings_t *mode)
 	if (ret < 0)
 		return ret;
 
-	// TODO: Disable the cursor.
-	//ISNE.DisableCursor(n1);
-	return ret;
+	// Disable the cursor.
+	// TODO: Separate into a separate function so we can make use of it later?
+	// X,Y pos are set to 255 to hide the cursor.
+	static const uint8_t cmd_cursorX[] = {0xFF, 0x00};
+	ret = writeNECMemory(0x800002C, cmd_cursorX, sizeof(cmd_cursorX));
+	if (ret < 0)
+		return ret;
+	static const uint8_t cmd_cursorY[] = {0xFF, 0x00};
+	return writeNECMemory(0x800002E, cmd_cursorY, sizeof(cmd_cursorX));
 }
