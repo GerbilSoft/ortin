@@ -11,6 +11,7 @@
 // C includes. (C++ namespace)
 #include <cassert>
 #include <cstring>
+#include <cstdio>
 
 // C++ includes.
 #include <algorithm>
@@ -18,7 +19,6 @@
 using std::unique_ptr;
 
 #include "byteswap.h"
-#include "nitro-usb-cmds.h"
 
 /**
  * Initialize an IS-NITRO unit.
@@ -212,4 +212,78 @@ int ISNitro::writeEmulationMemory(uint8_t _slot, uint32_t address, const uint8_t
 	assert(_slot == 1 || _slot == 2);
 	assert(len % 2 == 0);
 	return sendWriteCommand(NITRO_CMD_EMULATOR_MEMORY, _slot, address, data, len);
+}
+
+/**
+ * Write to the NEC CPU's memory.
+ *
+ * @param address Destination address.
+ * @param data Data.
+ * @param len Length of data.
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::writeNECMemory(uint32_t address, const uint8_t *data, uint32_t len)
+{
+	// NEC commands have an 8-byte structure, followed by the payload.
+	// Payload must be a multiple of 2 bytes.
+	assert(len % 2 == 0);
+	const uint32_t cdblen = len + sizeof(NitroNECCommand);
+	unique_ptr<uint8_t[]> cdb(new uint8_t[cdblen]);
+	NitroNECCommand *const pNecCmd = reinterpret_cast<NitroNECCommand*>(cdb.get());
+	pNecCmd->cmd = NITRO_CMD_NEC_MEMORY;
+	pNecCmd->unitSize = 2;
+	pNecCmd->length = cpu_to_le16(len / 2);
+	pNecCmd->address = cpu_to_le32(address);
+	memcpy(&cdb[sizeof(NitroNECCommand)], data, len);
+	return sendWriteCommand(NITRO_CMD_NEC_MEMORY, 0, 0, cdb.get(), cdblen);
+}
+
+/**
+ * Unlock the AV functionality.
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::unlockAV(void)
+{
+	static const uint8_t cmd1[] = {0x59, 0x00};
+	int ret = writeNECMemory(0x8000010, cmd1, sizeof(cmd1));
+	if (ret < 0)
+		return ret;
+
+	static const uint8_t cmd2[] = {0x4F, 0x00};
+	ret = writeNECMemory(0x8000012, cmd2, sizeof(cmd2));
+	if (ret < 0)
+		return ret;
+
+	static const uint8_t cmd3[] = {0x4B, 0x00};
+	ret = writeNECMemory(0x8000014, cmd3, sizeof(cmd3));
+	if (ret < 0)
+		return ret;
+
+	static const uint8_t cmd4[] = {0x4F, 0x00};
+	ret = writeNECMemory(0x8000016, cmd4, sizeof(cmd4));
+	return ret;
+}
+
+/**
+ * Set the video output mode.
+ * @param av1mode AV1 mode.
+ * @param av2mode AV2 mode.
+ * @param av1interlaced True for AV1 interlaced; false for AV1 non-interlaced.
+ * @param av2interlaced True for AV1 interlaced; false for AV2 non-interlaced.
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::setAVMode(NitroAVMode_e av1mode, NitroAVMode_e av2mode, bool av1interlaced, bool av2interlaced)
+{
+	// TODO: Change interlaced to bitfields; add rotation.
+	// Unlock the AV functionality.
+	int ret = unlockAV();
+	if (ret < 0)
+		return ret;
+
+	// TODO: Interlaced, rotation, deflicker.
+	uint8_t avmode = (uint8_t)av2mode | ((uint8_t)av1mode << 4);
+	const uint8_t cmd[] = {avmode, 0};
+	ret = writeNECMemory(0x800001E, cmd, sizeof(cmd));
+	printf("FINAL ret: %d\n", ret);
+	return ret;
 }

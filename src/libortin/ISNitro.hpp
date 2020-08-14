@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <libusb.h>
 
+#include "nitro-usb-cmds.h"
+
 class ISNitro
 {
 	public:
@@ -93,6 +95,32 @@ class ISNitro
 		 * @return 0 on success; libusb error code on error.
 		 */
 		int writeEmulationMemory(uint8_t _slot, uint32_t address, const uint8_t *data, uint32_t len);
+
+		/**
+		 * Write to the NEC CPU's memory.
+		 *
+		 * @param address Destination address.
+		 * @param data Data.
+		 * @param len Length of data.
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int writeNECMemory(uint32_t address, const uint8_t *data, uint32_t len);
+
+		/**
+		 * Unlock the AV functionality.
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int unlockAV(void);
+
+		/**
+		 * Set an AV port's output mode.
+		 * @param av1mode AV1 mode.
+		 * @param av2mode AV2 mode.
+		 * @param av1interlaced True for AV1 interlaced; false for AV1 non-interlaced.
+		 * @param av2interlaced True for AV1 interlaced; false for AV1 non-interlaced.
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int setAVMode(NitroAVMode_e av1mode, NitroAVMode_e av2mode, bool av1interlaced, bool av2interlaced);
 
 	protected:
 		libusb_context *m_ctx;

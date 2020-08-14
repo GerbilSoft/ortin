@@ -60,6 +60,11 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	// Set AV1 to Both screens, interlaced.
+	// Set AV2 to none.
+	int ret = nitro->setAVMode(NITRO_AV_MODE_BOTH, NITRO_AV_MODE_OFF, true, false);
+
+#if 0
 	static const size_t BUF_SIZE = 1048576U;
 	uint8_t *const buf1mb = static_cast<uint8_t*>(malloc(BUF_SIZE));
 
@@ -98,6 +103,7 @@ int main(int argc, char *argv[])
 	// NOTE: Slot power seems to be for PC-side access to the real slot...
 	//nitro->setSlotPower(1, true);
 	nitro->ndsReset(false);
+#endif
 
 out:
 	delete nitro;

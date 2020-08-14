@@ -42,10 +42,31 @@ typedef enum {
  */
 typedef enum {
 	NITRO_CMD_EMULATOR_MEMORY	= 0x00,
+	NITRO_CMD_NEC_MEMORY		= 0x26,
 	NITRO_CMD_FULL_RESET		= 0x81,
 	NITRO_CMD_NDS_RESET		= 0x8A,
 	NITRO_CMD_SLOT_POWER		= 0xAD,
 } NitroCommand_e;
+
+/**
+ * AV port mode
+ */
+typedef enum {
+	NITRO_AV_MODE_OFF	= 0,
+	NITRO_AV_MODE_TOP	= 1,
+	NITRO_AV_MODE_BOTTOM	= 2,
+	NITRO_AV_MODE_BOTH	= 3,
+} NitroAVMode_e;
+
+/**
+ * NEC memory write command.
+ */
+typedef struct _NitroNECCommand {
+	uint8_t cmd;		// Command (see NitroCommand_e)
+	uint8_t unitSize;
+	uint16_t length;	// Data length
+	uint32_t address;	// Destination address
+} NitroNECCommand;
 
 #ifdef __cplusplus
 }
