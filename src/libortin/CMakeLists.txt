@@ -11,10 +11,14 @@ PROJECT(libortin LANGUAGES CXX)
 # Sources.
 SET(libortin_SRCS
 	ISNitro.cpp
+	ndscrypt.cpp
+	crc.cpp
 	)
 # Headers.
 SET(libortin_H
 	ISNitro.hpp
+	ndscrypt.hpp
+	crc.h
 	byteorder.h
 	byteswap.h
 	nitro-usb-cmds.h

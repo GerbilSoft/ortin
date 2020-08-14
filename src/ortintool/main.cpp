@@ -23,6 +23,7 @@
 
 // IS-NITRO
 #include "ISNitro.hpp"
+#include "ndscrypt.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -93,6 +94,7 @@ int main(int argc, char *argv[])
 	// Load 1 MB at a time.
 	ret = 0;
 	uint32_t address = 0;
+	bool firstMB = true;
 	while (fileSize > 0) {
 		uint32_t curlen = std::min(fileSize, (off64_t)BUF_SIZE);
 		size_t size = fread(buf1mb, 1, curlen, f);
@@ -105,6 +107,12 @@ int main(int argc, char *argv[])
 			goto out;
 		}
 		fileSize -= curlen;
+
+		if (firstMB) {
+			// We may need to encrypt the secure area.
+			ndscrypt_secure_area(buf1mb, curlen);
+			firstMB = false;
+		}
 
 		if (curlen % 2 != 0) {
 			// Round it up to a multiple of two bytes.
