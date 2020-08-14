@@ -120,8 +120,8 @@ int main(int argc, char *argv[])
 	nitro->installDebuggerROM();
 
 	// ROM image loaded!
-	// NOTE: Slot power seems to be for PC-side access to the real slot...
-	//nitro->setSlotPower(1, true);
+	// Slot power must be turned on in order to access save memory.
+	nitro->setSlotPower(1, true);
 	nitro->ndsReset(false);
 
 out:
