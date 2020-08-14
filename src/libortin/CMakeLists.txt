@@ -12,7 +12,7 @@ PROJECT(libortin LANGUAGES CXX)
 SET(libortin_SRCS
 	ISNitro.cpp
 	ndscrypt.cpp
-	crc.cpp
+	crc.c
 	)
 # Headers.
 SET(libortin_H
