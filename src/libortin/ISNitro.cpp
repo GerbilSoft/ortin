@@ -20,6 +20,9 @@ using std::unique_ptr;
 
 #include "byteswap.h"
 
+// Debug ROM
+#include "bins/debugger_code.h"
+
 /**
  * Initialize an IS-NITRO unit.
  * TODO: Enumerate IS-NITRO units and allow the user to select one.
@@ -215,6 +218,48 @@ int ISNitro::writeEmulationMemory(uint8_t _slot, uint32_t address, const uint8_t
 }
 
 /**
+ * Install the debugger ROM.
+ * This is required in order to load an NDS game successfully.
+ *
+ * @param toFirmware If true, boot to NDS firmware instead of the game.
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::installDebuggerROM(bool toFirmware)
+{
+	// Debugger ROM is installed at 0xFF80000 in EMULATOR memory.
+	// TODO: Use the real debugger ROM, which requires more comprehensive init.
+	writeEmulationMemory(1, 0xFF80000, debugger_code, sizeof(debugger_code));
+
+	// Set the ISID in Slot 2.
+	uint8_t isid[1024];
+	memset(isid, 0, sizeof(isid));
+	memset(isid, 0xFF, 0x90);
+	memset(&isid[0xA0], 0xFF, 0x10);
+	isid[0xF6] = 0xFF;
+	isid[0xF7] = 0xFF;
+	isid[0x100] = 'I';
+	isid[0x101] = 'S';
+	isid[0x102] = 'I';
+	isid[0x103] = 'D';
+	isid[0x104] = 1;
+	writeEmulationMemory(2, 0, isid, sizeof(isid));
+
+	// Overwrite the debugging pointers in the ROM header.
+	const uint32_t debug_ptrs[4] = {
+		cpu_to_le32(0x8FF80000), cpu_to_le32((uint32_t)sizeof(debugger_code)),
+		cpu_to_le32(0x02700000), cpu_to_le32(0x02700004),
+	};
+	/*static const uint8_t debug_ptrs[16] = {
+		0x00,0x00,0xF8,0x8F,0x00,0x90,0x01,0x00,
+		0x00,0x00,0x70,0x02,0x04,0x00,0x70,0x02,
+	};*/
+	if (!toFirmware) {
+		writeEmulationMemory(1, 0x160, (const uint8_t*)debug_ptrs, sizeof(debug_ptrs));
+	}
+	return 0;
+}
+
+/**
  * Write to the NEC CPU's memory.
  *
  * @param address Destination address.
@@ -284,6 +329,5 @@ int ISNitro::setAVMode(NitroAVMode_e av1mode, NitroAVMode_e av2mode, bool av1int
 	uint8_t avmode = (uint8_t)av2mode | ((uint8_t)av1mode << 4);
 	const uint8_t cmd[] = {avmode, 0};
 	ret = writeNECMemory(0x800001E, cmd, sizeof(cmd));
-	printf("FINAL ret: %d\n", ret);
 	return ret;
 }

@@ -20,6 +20,35 @@ SET(libortin_H
 	nitro-usb-cmds.h
 	)
 
+#########
+# bin2h #
+#########
+
+ADD_EXECUTABLE(bin2h bin2h.c)
+
+############
+# Binaries #
+############
+
+SET(bins_FILES
+	bins/debugger_code.bin
+	)
+
+FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bins")
+UNSET(h_files)
+FOREACH(_bin ${bins_FILES})
+	STRING(REPLACE ".bin" ".h" _hfile ${_bin})
+	LIST(APPEND h_files "${CMAKE_CURRENT_BINARY_DIR}/${_hfile}")
+	ADD_CUSTOM_COMMAND(OUTPUT "${_hfile}"
+		COMMAND bin2h "${_bin}" "${CMAKE_CURRENT_BINARY_DIR}/${_hfile}"
+		DEPENDS bin2h.c ${_bin}
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+		)
+	UNSET(_hfile)
+ENDFOREACH()
+
+ADD_CUSTOM_TARGET(bins DEPENDS ${h_files})
+
 ######################
 # Build the library. #
 ######################
@@ -27,6 +56,7 @@ SET(libortin_H
 ADD_LIBRARY(ortin STATIC
 	${libortin_SRCS} ${libortin_H}
 	)
+ADD_DEPENDENCIES(ortin bins)
 
 # Include paths:
 # - Public: Current source and binary directories.

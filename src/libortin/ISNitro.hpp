@@ -97,6 +97,15 @@ class ISNitro
 		int writeEmulationMemory(uint8_t _slot, uint32_t address, const uint8_t *data, uint32_t len);
 
 		/**
+		 * Install the debugger ROM.
+		 * This is required in order to load an NDS game successfully.
+		 *
+		 * @param toFirmware If true, boot to NDS firmware instead of the game.
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int installDebuggerROM(bool toFirmware = false);
+
+		/**
 		 * Write to the NEC CPU's memory.
 		 *
 		 * @param address Destination address.
