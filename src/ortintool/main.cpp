@@ -65,7 +65,25 @@ int main(int argc, char *argv[])
 
 	// Set AV1 to Both screens, non-interlaced.
 	// Set AV2 to none.
-	int ret = nitro->setAVMode(NITRO_AV_MODE_BOTH, NITRO_AV_MODE_OFF, false, false);
+	NitroAVModeSettings_t avSettings;
+	avSettings.av[0].mode = NITRO_AV_MODE_BOTH;
+	avSettings.av[0].interlaced = false;
+	avSettings.av[0].aspect_ratio = true;
+	avSettings.av[0].spacing = 1;
+	avSettings.av[1].mode = NITRO_AV_MODE_OFF;
+	avSettings.av[1].interlaced = false;
+	avSettings.av[1].aspect_ratio = true;
+	avSettings.av[1].spacing = 1;
+	avSettings.bg_color = 0xFF808080;	// TODO
+	avSettings.rotation = NITRO_AV_ROTATION_NONE;
+	avSettings.deflicker = NITRO_AV_DEFLICKER_DISABLED;
+	int ret = nitro->setAVModeSettings(&avSettings);
+	if (ret < 0) {
+		fprintf(stderr, "*** ERROR: Failed to set AV mode: %d\n", ret);
+		fclose(f);
+		libusb_exit(nullptr);
+		return EXIT_FAILURE;
+	}
 
 	// Reset the IS-NITRO while loading a ROM image.
 	nitro->fullReset();

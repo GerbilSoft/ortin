@@ -122,14 +122,19 @@ class ISNitro
 		int unlockAV(void);
 
 		/**
-		 * Set an AV port's output mode.
-		 * @param av1mode AV1 mode.
-		 * @param av2mode AV2 mode.
-		 * @param av1interlaced True for AV1 interlaced; false for AV1 non-interlaced.
-		 * @param av2interlaced True for AV1 interlaced; false for AV1 non-interlaced.
+		 * Write a monitor configuration register.
+		 * @param reg Register number.
+		 * @param value Value.
 		 * @return 0 on success; libusb error code on error.
 		 */
-		int setAVMode(NitroAVMode_e av1mode, NitroAVMode_e av2mode, bool av1interlaced, bool av2interlaced);
+		int writeMonitorConfigRegister(uint8_t reg, uint16_t value);
+
+		/**
+		 * Set the AV mode settings.
+		 * @param mode AV mode settings.
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int setAVModeSettings(const NitroAVModeSettings_t *mode);
 
 	protected:
 		libusb_context *m_ctx;

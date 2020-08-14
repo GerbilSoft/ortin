@@ -59,6 +59,47 @@ typedef enum {
 } NitroAVMode_e;
 
 /**
+ * AV mode settings for a single output.
+ * For internal use; does not match the actual registers!
+ */
+typedef struct _NitroAVModeScreen_t {
+	NitroAVMode_e mode;	// Off, Top, Bottom, Both
+	bool interlaced;	// True for interlaced
+	bool aspect_ratio;	// True for correct aspect ratio
+	int spacing;		// Spacing between screens (minimum 1)
+} NitroAVModeScreen_t;
+
+/**
+ * AV mode settings for both outputs.
+ * For internal use; does not match the actual registers!
+ */
+typedef struct _NitroAVModeSettings_t {
+	NitroAVModeScreen_t av[2];	// Per-screen settings
+	uint32_t bg_color;		// Background color (ARGB32 format)
+	uint8_t rotation;		// Rotation (see NitroAVRotation_e)
+	uint8_t deflicker;		// Deflicker (see NitroAVDeflicker_e)
+} NitroAVModeSettings_t;
+
+/**
+ * AV mode: Rotation
+ */
+typedef enum {
+	NITRO_AV_ROTATION_NONE		= 0,
+	NITRO_AV_ROTATION_LEFT		= 1,
+	NITRO_AV_ROTATION_UPSIDE_DOWN	= 2,	// ???
+	NITRO_AV_ROTATION_RIGHT		= 3,
+} NitroAVRotation_e;
+
+/**
+ * AV mode: Deflicker
+ */
+typedef enum {
+	NITRO_AV_DEFLICKER_DISABLED	= 0,
+	NITRO_AV_DEFLICKER_NORMAL	= 1,
+	NITRO_AV_DEFLICKER_ALTERNATE	= 3,
+} NitroAVDeflicker_e;
+
+/**
  * NEC memory write command.
  */
 typedef struct _NitroNECCommand {

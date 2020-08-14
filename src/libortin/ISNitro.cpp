@@ -310,14 +310,33 @@ int ISNitro::unlockAV(void)
 }
 
 /**
- * Set the video output mode.
- * @param av1mode AV1 mode.
- * @param av2mode AV2 mode.
- * @param av1interlaced True for AV1 interlaced; false for AV1 non-interlaced.
- * @param av2interlaced True for AV1 interlaced; false for AV2 non-interlaced.
+ * Write a monitor configuration register.
+ * @param reg Register number.
+ * @param value Value.
  * @return 0 on success; libusb error code on error.
  */
-int ISNitro::setAVMode(NitroAVMode_e av1mode, NitroAVMode_e av2mode, bool av1interlaced, bool av2interlaced)
+int ISNitro::writeMonitorConfigRegister(uint8_t reg, uint16_t value)
+{
+	const uint8_t cmd1[] = {reg, 0};
+	int ret = writeNECMemory(0x8000030, cmd1, sizeof(cmd1));
+	if (ret < 0)
+		return ret;
+
+	const uint8_t cmd2[] = {(uint8_t)(value & 0xFF), 0};
+	ret = writeNECMemory(0x8000034, cmd2, sizeof(cmd2));
+	if (ret < 0)
+		return ret;
+
+	const uint8_t cmd3[] = {(uint8_t)(value >> 8), 0};
+	return writeNECMemory(0x8000036, cmd3, sizeof(cmd3));
+}
+
+/**
+ * Set the AV mode settings.
+ * @param mode AV mode.
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::setAVModeSettings(const NitroAVModeSettings_t *mode)
 {
 	// TODO: Change interlaced to bitfields; add rotation.
 	// Unlock the AV functionality.
@@ -325,9 +344,65 @@ int ISNitro::setAVMode(NitroAVMode_e av1mode, NitroAVMode_e av2mode, bool av1int
 	if (ret < 0)
 		return ret;
 
-	// TODO: Interlaced, rotation, deflicker.
-	uint8_t avmode = (uint8_t)av2mode | ((uint8_t)av1mode << 4);
-	const uint8_t cmd[] = {avmode, 0};
+	// AV1 monitor parameters
+	ret = writeMonitorConfigRegister(0x80, (mode->av[0].aspect_ratio ? 192 : 225));
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x81, 352);
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x82, 44);
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x83, (44 - (mode->av[0].spacing / 2)));
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x84, mode->av[0].spacing);
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x85, !!mode->av[0].interlaced);
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x86, !!mode->av[0].aspect_ratio);
+	if (ret < 0)
+		return ret;
+
+	// AV2 monitor parameters
+	ret = writeMonitorConfigRegister(0x00, (mode->av[1].aspect_ratio ? 192 : 225));
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x01, 352);
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x02, 44);
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x03, (44 - (mode->av[1].spacing / 2)));
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x04, mode->av[1].spacing);
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x05, !!mode->av[1].interlaced);
+	if (ret < 0)
+		return ret;
+	ret = writeMonitorConfigRegister(0x06, !!mode->av[1].aspect_ratio);
+	if (ret < 0)
+		return ret;
+
+	// TODO: Background color.
+
+	// Monitor state bitfield.
+	uint8_t monitor_state =  (uint8_t)mode->av[1].mode |
+				((uint8_t)mode->rotation << 2) |
+				((uint8_t)mode->av[0].mode << 4) |
+				((uint8_t)mode->deflicker << 6);
+	const uint8_t cmd[] = {monitor_state, 0};
 	ret = writeNECMemory(0x800001E, cmd, sizeof(cmd));
+	if (ret < 0)
+		return ret;
+
+	// TODO: Disable the cursor.
+	//ISNE.DisableCursor(n1);
 	return ret;
 }
