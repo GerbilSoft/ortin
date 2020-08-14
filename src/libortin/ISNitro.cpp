@@ -332,6 +332,27 @@ int ISNitro::writeMonitorConfigRegister(uint8_t reg, uint16_t value)
 }
 
 /**
+ * Set the background color.
+ * @param bg_color Background color. (ARGB32)
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::setBgColor(uint32_t bg_color)
+{
+	uint8_t cmd[] = {(uint8_t)(bg_color & 0xFF), 0x00};
+	int ret = writeNECMemory(0x800001C, cmd, sizeof(cmd));
+	if (ret < 0)
+		return ret;
+	bg_color >>= 8;
+	cmd[0] = (uint8_t)(bg_color & 0xFF);
+	ret = writeNECMemory(0x800001A, cmd, sizeof(cmd));
+	if (ret < 0)
+		return ret;
+	bg_color >>= 8;
+	cmd[0] = (uint8_t)(bg_color & 0xFF);
+	return writeNECMemory(0x8000018, cmd, sizeof(cmd));
+}
+
+/**
  * Set the AV mode settings.
  * @param mode AV mode.
  * @return 0 on success; libusb error code on error.
@@ -390,7 +411,10 @@ int ISNitro::setAVModeSettings(const NitroAVModeSettings_t *mode)
 	if (ret < 0)
 		return ret;
 
-	// TODO: Background color.
+	// Set the background color.
+	ret = setBgColor(mode->bg_color);
+	if (ret < 0)
+		return ret;
 
 	// Monitor state bitfield.
 	uint8_t monitor_state =  (uint8_t)mode->av[1].mode |

@@ -130,6 +130,13 @@ class ISNitro
 		int writeMonitorConfigRegister(uint8_t reg, uint16_t value);
 
 		/**
+		 * Set the background color.
+		 * @param bg_color Background color. (ARGB32)
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int setBgColor(uint32_t bg_color);
+
+		/**
 		 * Set the AV mode settings.
 		 * @param mode AV mode settings.
 		 * @return 0 on success; libusb error code on error.
