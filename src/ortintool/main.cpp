@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 	avSettings.av[1].interlaced = false;
 	avSettings.av[1].aspect_ratio = true;
 	avSettings.av[1].spacing = 1;
-	avSettings.bg_color = 0xFF808080;	// TODO
+	avSettings.bg_color = 0xFFFF5555;	// CGA bright red
 	avSettings.rotation = NITRO_AV_ROTATION_NONE;
 	avSettings.deflicker = NITRO_AV_DEFLICKER_DISABLED;
 	int ret = nitro->setAVModeSettings(&avSettings);
