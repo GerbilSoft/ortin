@@ -117,6 +117,13 @@ class ISNitro
 		int installDebuggerROM(bool toFirmware = false);
 
 		/**
+		 * Wait for the debugger ROM to initialize.
+		 * Debugger ROM must be installed and NDS must be out of reset.
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int waitForDebuggerROM(void);
+
+		/**
 		 * Write to the NEC CPU's memory.
 		 *
 		 * @param address Destination address.
@@ -157,17 +164,25 @@ class ISNitro
 		/**
 		 * Insert a breakpoint into a CPU to pause it.
 		 * CPU must be in BREAK in order to read from its memory space.
-		 * @param cpu CPU index. (0 == ARM9, 1 == ARM7)
+		 * @param cpu CPU index. (See NitroCPU_e.)
 		 * @return 0 on success; libusb error code on error.
 		 */
 		int breakProcessor(uint8_t cpu);
 
 		/**
 		 * Continue the CPU from break.
-		 * @param cpu CPU index. (0 == ARM9, 1 == ARM7)
+		 * @param cpu CPU index. (See NitroCPU_e.)
 		 * @return 0 on success; libusb error code on error.
 		 */
 		int continueProcessor(uint8_t cpu);
+
+		/**
+		 * Send cmd174 to the specified CPU.
+		 * This is usually done after initializing the debugger ROM.
+		 * @param cpu CPU index. (See NitroCPU_e.)
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int sendCpuCMD174(uint8_t cpu);
 
 	protected:
 		libusb_context *m_ctx;

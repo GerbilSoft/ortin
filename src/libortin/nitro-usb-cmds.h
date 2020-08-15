@@ -112,6 +112,14 @@ typedef struct _NitroNECCommand {
 	uint32_t address;	// Destination address
 } NitroNECCommand;
 
+/**
+ * CPU index.
+ */
+typedef enum {
+	NITRO_CPU_ARM9	= 0,
+	NITRO_CPU_ARM7	= 1,
+} NitroCPU_e;
+
 #ifdef __cplusplus
 }
 #endif

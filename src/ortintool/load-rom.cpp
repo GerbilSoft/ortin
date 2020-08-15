@@ -95,5 +95,23 @@ int load_nds_rom(ISNitro *nitro, const TCHAR *filename)
 	// Slot power must be turned on in order to access save memory.
 	nitro->setSlotPower(1, true);
 	nitro->ndsReset(false);
+
+	// Wait for the debugger ROM to initialize.
+	int ret = nitro->waitForDebuggerROM();
+	if (ret < 0)
+		return ret;
+
+	// LibISNitroEmulator sends cmd174 to both CPUs here.
+	ret = nitro->sendCpuCMD174(NITRO_CPU_ARM9);
+	if (ret < 0)
+		return ret;
+	ret = nitro->sendCpuCMD174(NITRO_CPU_ARM7);
+	if (ret < 0)
+		return ret;
+
+	// Start the ARM9 and ARM7 CPUs.
+	// (Official debugger ROM requires this; NitroDriver's ROM does not.)
+	nitro->continueProcessor(0);
+	nitro->continueProcessor(1);
 	return 0;
 }

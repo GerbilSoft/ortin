@@ -302,7 +302,6 @@ int ISNitro::writeEmulationMemory(uint8_t _slot, uint32_t address, const uint8_t
 int ISNitro::installDebuggerROM(bool toFirmware)
 {
 	// Debugger ROM is installed at 0xFF80000 in EMULATOR memory.
-	// TODO: Use the real debugger ROM, which requires more comprehensive init.
 	writeEmulationMemory(1, 0xFF80000, debugger_code, sizeof(debugger_code));
 
 	// Set the ISID in Slot 2.
@@ -324,14 +323,59 @@ int ISNitro::installDebuggerROM(bool toFirmware)
 		cpu_to_le32(0x8FF80000), cpu_to_le32((uint32_t)sizeof(debugger_code)),
 		cpu_to_le32(0x02700000), cpu_to_le32(0x02700004),
 	};
-	/*static const uint8_t debug_ptrs[16] = {
-		0x00,0x00,0xF8,0x8F,0x00,0x90,0x01,0x00,
-		0x00,0x00,0x70,0x02,0x04,0x00,0x70,0x02,
-	};*/
 	if (!toFirmware) {
 		writeEmulationMemory(1, 0x160, (const uint8_t*)debug_ptrs, sizeof(debug_ptrs));
 	}
 	return 0;
+}
+
+/**
+ * Wait for the debugger ROM to initialize.
+ * Debugger ROM must be installed and NDS must be out of reset.
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::waitForDebuggerROM(void)
+{
+	uint8_t cmdSetCPU[] = {NITRO_CMD_SET_CPU, 0, 0, 0};
+
+	// Try up to 1000 times.
+	for (int i = 0; i < 1000; i++) {
+		uint8_t bufARM9[8], bufARM7[8];
+
+		// Set the current CPU to ARM9.
+		cmdSetCPU[2] = NITRO_CPU_ARM9;
+		int ret = sendWriteCommand(NITRO_CMD_SET_CPU, 0, 0, cmdSetCPU, sizeof(cmdSetCPU));
+		if (ret < 0)
+			return ret;
+
+		// Read the debugger state. (cmd139?)
+		ret = sendReadCommand(139, 0, 0, bufARM9, sizeof(bufARM9));
+		if (ret < 0)
+			return ret;
+
+		// Set the current CPU to ARM7.
+		cmdSetCPU[2] = NITRO_CPU_ARM7;
+		ret = sendWriteCommand(NITRO_CMD_SET_CPU, 0, 0, cmdSetCPU, sizeof(cmdSetCPU));
+		if (ret < 0)
+			return ret;
+
+		// Read the debugger state. (cmd139?)
+		ret = sendReadCommand(139, 0, 0, bufARM7, sizeof(bufARM7));
+		if (ret < 0)
+			return ret;
+
+		// Is the debugger initialized?
+		if (bufARM9[3] == 1 && bufARM7[3] == 1) {
+			// Debugger initialized!
+			return 0;
+		}
+
+		// Wait 10ms and try again.
+		usleep(10000);
+	}
+
+	// Debugger ROM failed to initialize...
+	return LIBUSB_ERROR_TIMEOUT;
 }
 
 /**
@@ -515,7 +559,7 @@ int ISNitro::setAVModeSettings(const NitroAVModeSettings_t *mode)
 /**
  * Insert a breakpoint into a CPU to pause it.
  * CPU must be in BREAK in order to read from its memory space.
- * @param cpu CPU index. (0 == ARM9, 1 == ARM7)
+ * @param cpu CPU index. (See NitroCPU_e.)
  * @return 0 on success; libusb error code on error.
  */
 int ISNitro::breakProcessor(uint8_t cpu)
@@ -556,7 +600,7 @@ int ISNitro::breakProcessor(uint8_t cpu)
 
 /**
  * Continue the CPU from break.
- * @param cpu CPU index. (0 == ARM9, 1 == ARM7)
+ * @param cpu CPU index. (See NitroCPU_e.)
  * @return 0 on success; libusb error code on error.
  */
 int ISNitro::continueProcessor(uint8_t cpu)
@@ -591,4 +635,26 @@ int ISNitro::continueProcessor(uint8_t cpu)
 		return ret;
 
 	return ret;
+}
+
+/**
+ * Send cmd174 to the specified CPU.
+ * This is usually done after initializing the debugger ROM.
+ * @param cpu CPU index. (See NitroCPU_e.)
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::sendCpuCMD174(uint8_t cpu)
+{
+	// TODO: Split operations into separate functions?
+	assert(cpu == 0 || cpu == 1);
+
+	// Set the current CPU.
+	const uint8_t cmdSetCPU[] = {NITRO_CMD_SET_CPU, 0, cpu, 0};
+	int ret = sendWriteCommand(NITRO_CMD_SET_CPU, 0, 0, cmdSetCPU, sizeof(cmdSetCPU));
+	if (ret < 0)
+		return ret;
+
+	// Send cmd174.
+	const uint32_t cmd174[] = {cpu_to_le32(174), cpu_to_le32(3), cpu_to_le32(1), 0, 0};
+	return sendWriteCommand(174, 0, 0, (const uint8_t*)cmd174, sizeof(cmd174));
 }
