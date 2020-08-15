@@ -108,6 +108,12 @@ static void print_help(const TCHAR *argv0)
 		"  - I: Use interlaced output.\n"
 		"  - A: Do not use the correct aspect ratio.\n"
 		"\n"
+		"sloton N\n"
+		"- Enables slot 1 (DS) or 2 (GBA).\n"
+		"\n"
+		"slotoff N\n"
+		"- Powers off slot 1 (DS) or 2 (GBA).\n"
+		"\n"
 		"help\n"
 		"- Display this help and exit.\n"
 		"\n"
@@ -261,6 +267,34 @@ int ORTIN_CDECL _tmain(int argc, TCHAR *argv[])
 			ret = EXIT_FAILURE;
 		} else {
 			ret = set_av_mode(nitro, argv[optind+1], argv[optind+2], bg_color, deflicker, rotation);
+		}
+	} else if (!_tcscmp(argv[optind], _T("sloton"))) {
+		// Turn on a slot.
+		if (argc < optind+2) {
+			print_error(argv[0], _T("Slot number not specified"));
+			ret = EXIT_FAILURE;
+		} else {
+			int _slot = strtol(argv[optind+1], nullptr, 10);
+			if (_slot == 1 || _slot == 2) {
+				ret = nitro->setSlotPower(_slot, true);
+			} else {
+				print_error(argv[0], _T("Slot number '%s' is not valid"), argv[optind+1]);
+				ret = EXIT_FAILURE;
+			}
+		}
+	} else if (!_tcscmp(argv[optind], _T("slotoff"))) {
+		// Turn on a slot.
+		if (argc < optind+2) {
+			print_error(argv[0], _T("Slot number not specified"));
+			ret = EXIT_FAILURE;
+		} else {
+			int _slot = strtol(argv[optind+1], nullptr, 10);
+			if (_slot == 1 || _slot == 2) {
+				ret = nitro->setSlotPower(_slot, false);
+			} else {
+				print_error(argv[0], _T("Slot number '%s' is not valid"), argv[optind+1]);
+				ret = EXIT_FAILURE;
+			}
 		}
 	} else {
 		// Not recognized.

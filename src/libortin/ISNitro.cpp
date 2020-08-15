@@ -158,6 +158,12 @@ int ISNitro::sendWriteCommand(uint16_t cmd, uint8_t _slot, uint32_t address, con
  */
 int ISNitro::fullReset(void)
 {
+	// Turn off Slot 2 if it's enabled.
+	// (Full Reset doesn't turn it off for some reason.)
+	int ret = setSlotPower(2, false);
+	if (ret < 0)
+		return ret;
+
 	static const uint8_t data[] = {NITRO_CMD_FULL_RESET, 0xF2};
 	return sendWriteCommand(NITRO_CMD_FULL_RESET, 0, 0, data, sizeof(data));
 }
@@ -184,17 +190,34 @@ int ISNitro::ndsReset(bool reset)
  */
 int ISNitro::setSlotPower(uint8_t _slot, bool on)
 {
-	// TODO: Slot 2.
-	assert(_slot == 1);
+	assert(_slot == 1 || _slot == 2);
 
-	const uint8_t data[] = {NITRO_CMD_SLOT_POWER, 0x00, 0x00, 0x00,
-		0x0a, 0x00, 0x00, 0x00,
+	uint8_t data[] = {
+		NITRO_CMD_SLOT_POWER, 0x00, 0x00, 0x00,
+		0 /* device */, 0x00, 0x00, 0x00,
 		on,   0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00
 	};
-	return sendWriteCommand(NITRO_CMD_SLOT_POWER, 0, 0, data, sizeof(data));
+
+	int ret = 0;
+	if (_slot == 1) {
+		data[4] = 0x0A;	// slot 1
+		ret = sendWriteCommand(NITRO_CMD_SLOT_POWER, 0, 0, data, sizeof(data));
+	} else /*if (_slot == 2)*/ {
+		data[4] = 0x02;	// slot 2 (primary?)
+		ret = sendWriteCommand(NITRO_CMD_SLOT_POWER, 0, 0, data, sizeof(data));
+		if (ret < 0)
+			return ret;
+		if (on) {
+			data[4] = 0x04;	// slot 2 (secondary?)
+			data[8] = 0;
+			ret = sendWriteCommand(NITRO_CMD_SLOT_POWER, 0, 0, data, sizeof(data));
+		}
+	}
+
+	return ret;
 }
 
 /**
