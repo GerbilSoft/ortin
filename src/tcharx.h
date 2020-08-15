@@ -62,6 +62,10 @@ typedef char TCHAR;
 #define _tcsncmp(s1, s2, n)		strncmp((s1), (s2), (n))
 #define _tcsrchr(s, c)			strrchr((s), (c))
 
+// ctype.h
+#define _totlower(c)			tolower(c)
+#define _totupper(c)			toupper(c)
+
 #endif /* _WIN32 */
 
 #endif /* __ORTIN_TCHARX_H__ */

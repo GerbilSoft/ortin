@@ -53,8 +53,8 @@ typedef enum {
  */
 typedef enum {
 	NITRO_AV_MODE_OFF	= 0,
-	NITRO_AV_MODE_TOP	= 1,
-	NITRO_AV_MODE_BOTTOM	= 2,
+	NITRO_AV_MODE_UPPER	= 1,
+	NITRO_AV_MODE_LOWER	= 2,
 	NITRO_AV_MODE_BOTH	= 3,
 } NitroAVMode_e;
 
@@ -76,19 +76,9 @@ typedef struct _NitroAVModeScreen_t {
 typedef struct _NitroAVModeSettings_t {
 	NitroAVModeScreen_t av[2];	// Per-screen settings
 	uint32_t bg_color;		// Background color (ARGB32 format)
-	uint8_t rotation;		// Rotation (see NitroAVRotation_e)
 	uint8_t deflicker;		// Deflicker (see NitroAVDeflicker_e)
+	uint8_t rotation;		// Rotation (see NitroAVRotation_e)
 } NitroAVModeSettings_t;
-
-/**
- * AV mode: Rotation
- */
-typedef enum {
-	NITRO_AV_ROTATION_NONE		= 0,
-	NITRO_AV_ROTATION_LEFT		= 1,
-	NITRO_AV_ROTATION_UPSIDE_DOWN	= 2,	// ???
-	NITRO_AV_ROTATION_RIGHT		= 3,
-} NitroAVRotation_e;
 
 /**
  * AV mode: Deflicker
@@ -98,6 +88,15 @@ typedef enum {
 	NITRO_AV_DEFLICKER_NORMAL	= 1,
 	NITRO_AV_DEFLICKER_ALTERNATE	= 3,
 } NitroAVDeflicker_e;
+
+/**
+ * AV mode: Rotation
+ */
+typedef enum {
+	NITRO_AV_ROTATION_NONE		= 0,
+	NITRO_AV_ROTATION_LEFT		= 1,
+	NITRO_AV_ROTATION_RIGHT		= 3,
+} NitroAVRotation_e;
 
 /**
  * NEC memory write command.

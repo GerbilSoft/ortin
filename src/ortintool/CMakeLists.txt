@@ -11,9 +11,13 @@ PROJECT(ortintool LANGUAGES C CXX)
 # Sources.
 SET(ortintool_SRCS
 	main.cpp
+	load-rom.cpp
+	avmode.cpp
 	)
 # Headers.
 SET(ortintool_H
+	load-rom.hpp
+	avmode.hpp
 	)
 
 #########################
@@ -30,8 +34,7 @@ SET_WINDOWS_NO_MANIFEST(ortintool)
 
 # FIXME: setargv isn't necessarily sorted...
 # TODO: Implement our own setargv function?
-# TODO: Unicode support.
-SET_WINDOWS_ENTRYPOINT(ortintool main ON)
+SET_WINDOWS_ENTRYPOINT(ortintool wmain ON)
 
 # Include paths:
 # - Public: Current source and binary directories.
