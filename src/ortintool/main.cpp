@@ -85,6 +85,9 @@ static void print_help(const TCHAR *argv0)
 		"\n"
 		"Supported commands:\n"
 		"\n"
+		"reset\n"
+		"- Do a full reset. This clears the first 32 KB of EMULATOR memory.\n"
+		"\n"
 		"load filename.nds\n"
 		"- Load a Nintendo DS ROM image. If the image has a decrypted secure area,\n"
 		"  it will be re-encrypted on load.\n"
@@ -227,6 +230,12 @@ int ORTIN_CDECL _tmain(int argc, TCHAR *argv[])
 		// Display help.
 		print_help(argv[0]);
 		return EXIT_SUCCESS;
+	} else if (!_tcscmp(argv[optind], _T("reset"))) {
+		// Wipe the first 32 KB of EMULATOR memory and reset the system.
+		uint8_t *zerobytes = static_cast<uint8_t*>(calloc(1, 32768));
+		nitro->writeEmulationMemory(1, 0, zerobytes, 32768);
+		free(zerobytes);
+		ret = nitro->fullReset();
 	} else if (!_tcscmp(argv[optind], _T("load"))) {
 		// Load a ROM image.
 		if (argc < optind+2) {
@@ -243,6 +252,11 @@ int ORTIN_CDECL _tmain(int argc, TCHAR *argv[])
 		} else {
 			ret = set_av_mode(nitro, argv[optind+1], argv[optind+2], bg_color, deflicker, rotation);
 		}
+	} else {
+		// Not recognized.
+		// TODO: If it's a filename, try loading the ROM.
+		print_error(argv[0], _T("unrecognized command '%s'"), argv[optind]);
+		ret = EXIT_FAILURE;
 	}
 
 	delete nitro;
