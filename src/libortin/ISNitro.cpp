@@ -8,6 +8,9 @@
 
 #include "ISNitro.hpp"
 
+// C includes.
+#include <unistd.h>	// FIXME: usleep() for Windows
+
 // C includes. (C++ namespace)
 #include <cassert>
 #include <cstring>
@@ -82,13 +85,62 @@ ISNitro::~ISNitro()
 }
 
 /**
+ * Send a READ command.
+ * @param cmd		[in] Command.
+ * @param _slot		[in] Slot number for EMULATOR memory.
+ * @param address	[in] Source address.
+ * @param data		[out] Data.
+ * @param len		[in] Length of data.
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::sendReadCommand(uint16_t cmd, uint8_t _slot, uint32_t address, uint8_t *data, uint32_t len)
+{
+	NitroUSBCmd cdb;
+	cdb.cmd = cpu_to_le16(cmd);
+	cdb.op = NITRO_OP_READ;
+	cdb._slot = _slot;
+	cdb.address = cpu_to_le32(address);
+	cdb.length = cpu_to_le32(len);
+	cdb.zero = 0;
+
+	// Send the READ command.
+	int transferred = 0;
+	int ret = libusb_bulk_transfer(m_device, BULK_EP_OUT,
+		(uint8_t*)&cdb, (int)sizeof(cdb), &transferred, 1000);
+	if (ret < 0) {
+		printf("A ERR!!!!\n");
+		return ret;
+	}
+	if (transferred != (int)sizeof(cdb)) {
+		// Short write.
+		printf("SHORT WRITE: transferred == %d, len == %d\n", transferred, (int)sizeof(cdb));
+		return LIBUSB_ERROR_TIMEOUT;
+	}
+
+	// Read the data.
+	ret = libusb_bulk_transfer(m_device, BULK_EP_IN,
+		data, (int)len, &transferred, 1000);
+	if (ret < 0) {
+		printf("B ERR!!!!\n");
+		printf("transferred == %d, len == %d\n", transferred, (int)len);
+		return ret;
+	}
+	if (transferred != (int)len) {
+		// Short read.
+		printf("SHORT READ: transferred == %d, len == %d\n", transferred, (int)len);
+		return LIBUSB_ERROR_TIMEOUT;
+	}
+
+	return 0;
+}
+
+/**
  * Send a WRITE command.
- * @param cmd Command.
- * @param unk Unknown.
- * @param _slot Slot number for EMULATOR memory.
- * @param address Destination address.
- * @param data Data.
- * @param len Length of data.
+ * @param cmd		[in] Command.
+ * @param _slot		[in] Slot number for EMULATOR memory.
+ * @param address	[in] Destination address.
+ * @param data		[in] Data.
+ * @param len		[in] Length of data.
  * @return 0 on success; libusb error code on error.
  */
 int ISNitro::sendWriteCommand(uint16_t cmd, uint8_t _slot, uint32_t address, const uint8_t *data, uint32_t len)
@@ -458,4 +510,85 @@ int ISNitro::setAVModeSettings(const NitroAVModeSettings_t *mode)
 		return ret;
 	static const uint8_t cmd_cursorY[] = {0xFF, 0x00};
 	return writeNECMemory(0x800002E, cmd_cursorY, sizeof(cmd_cursorX));
+}
+
+/**
+ * Insert a breakpoint into a CPU to pause it.
+ * CPU must be in BREAK in order to read from its memory space.
+ * @param cpu CPU index. (0 == ARM9, 1 == ARM7)
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::breakProcessor(uint8_t cpu)
+{
+	// TODO: Split operations into separate functions?
+	assert(cpu == 0 || cpu == 1);
+
+	// Set the current CPU.
+	const uint8_t cmdSetCPU[] = {NITRO_CMD_SET_CPU, 0, cpu, 0};
+	int ret = sendWriteCommand(NITRO_CMD_SET_CPU, 0, 0, cmdSetCPU, sizeof(cmdSetCPU));
+	if (ret < 0)
+		return ret;
+
+	// Toggle the FIQ pin for the CPU.
+	ret = sendWriteCommand(NITRO_CMD_SET_FIQ_PIN, 0, 1, nullptr, 0);
+	if (ret < 0)
+		return ret;
+	ret = sendWriteCommand(NITRO_CMD_SET_FIQ_PIN, 0, 0, nullptr, 0);
+	if (ret < 0)
+		return ret;
+
+	// Do "something" with A0 for the CPU...
+	const uint8_t cmdDoSomethingA0[] = {NITRO_CMD_DO_SOMETHING_A0, cpu};
+	ret = sendWriteCommand(NITRO_CMD_DO_SOMETHING_A0, 0, 0, cmdDoSomethingA0, sizeof(cmdDoSomethingA0));
+	if (ret < 0)
+		return ret;
+
+	// Set breakpoints.
+	// TODO: Breakpoint builder.
+	// 8 == begin break
+	const uint32_t cmdBkpt[] = {cpu_to_le32(NITRO_CMD_SET_BREAKPOINTS), cpu_to_le32(4), cpu_to_le32(8)};
+	ret = sendWriteCommand(NITRO_CMD_SET_BREAKPOINTS, 0, 0, (const uint8_t*)cmdBkpt, sizeof(cmdBkpt));
+	if (ret < 0)
+		return ret;
+
+	return ret;
+}
+
+/**
+ * Continue the CPU from break.
+ * @param cpu CPU index. (0 == ARM9, 1 == ARM7)
+ * @return 0 on success; libusb error code on error.
+ */
+int ISNitro::continueProcessor(uint8_t cpu)
+{
+	// TODO: Split operations into separate functions?
+	assert(cpu == 0 || cpu == 1);
+
+	// Set the current CPU.
+	const uint8_t cmdSetCPU[] = {NITRO_CMD_SET_CPU, 0, cpu, 0};
+	int ret = sendWriteCommand(NITRO_CMD_SET_CPU, 0, 0, cmdSetCPU, sizeof(cmdSetCPU));
+	if (ret < 0)
+		return ret;
+
+	// cmd 135?
+	static const uint8_t cmd135[] = {135, 0, 2, 0,    0,0,0,0, 0,0,0,0};
+	ret = sendWriteCommand(135, 0, 0, cmd135, sizeof(cmd135));
+	if (ret < 0)
+		return ret;
+
+	// Set breakpoints.
+	// TODO: Breakpoint builder.
+	// 9 == continue from break
+	const uint32_t cmdBkpt[] = {cpu_to_le32(NITRO_CMD_SET_BREAKPOINTS), cpu_to_le32(4), cpu_to_le32(9)};
+	ret = sendWriteCommand(NITRO_CMD_SET_BREAKPOINTS, 0, 0, (const uint8_t*)cmdBkpt, sizeof(cmdBkpt));
+	if (ret < 0)
+		return ret;
+
+	// cmd 133?
+	static const uint8_t cmd133[] = {133, 0};
+	ret = sendWriteCommand(133, 0, 0, cmd133, sizeof(cmd133));
+	if (ret < 0)
+		return ret;
+
+	return ret;
 }

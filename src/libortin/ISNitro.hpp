@@ -47,12 +47,23 @@ class ISNitro
 
 	protected:
 		/**
+		 * Send a READ command.
+		 * @param cmd		[in] Command.
+		 * @param _slot		[in] Slot number for EMULATOR memory.
+		 * @param address	[in] Source address.
+		 * @param data		[out] Data.
+		 * @param len		[in] Length of data.
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int sendReadCommand(uint16_t cmd, uint8_t _slot, uint32_t address, uint8_t *data, uint32_t len);
+
+		/**
 		 * Send a WRITE command.
-		 * @param cmd Command.
-		 * @param _slot Slot number for EMULATOR memory.
-		 * @param address Destination address.
-		 * @param data Data.
-		 * @param len Length of data.
+		 * @param cmd		[in] Command.
+		 * @param _slot		[in] Slot number for EMULATOR memory.
+		 * @param address	[in] Destination address.
+		 * @param data		[in] Data.
+		 * @param len		[in] Length of data.
 		 * @return 0 on success; libusb error code on error.
 		 */
 		int sendWriteCommand(uint16_t cmd, uint8_t _slot, uint32_t address, const uint8_t *data, uint32_t len);
@@ -142,6 +153,21 @@ class ISNitro
 		 * @return 0 on success; libusb error code on error.
 		 */
 		int setAVModeSettings(const NitroAVModeSettings_t *mode);
+
+		/**
+		 * Insert a breakpoint into a CPU to pause it.
+		 * CPU must be in BREAK in order to read from its memory space.
+		 * @param cpu CPU index. (0 == ARM9, 1 == ARM7)
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int breakProcessor(uint8_t cpu);
+
+		/**
+		 * Continue the CPU from break.
+		 * @param cpu CPU index. (0 == ARM9, 1 == ARM7)
+		 * @return 0 on success; libusb error code on error.
+		 */
+		int continueProcessor(uint8_t cpu);
 
 	protected:
 		libusb_context *m_ctx;
