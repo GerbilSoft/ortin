@@ -576,9 +576,9 @@ int ISNitro::breakProcessor(uint8_t cpu)
 	if (ret < 0)
 		return ret;
 
-	// Do "something" with A0 for the CPU...
-	const uint8_t cmdDoSomethingA0[] = {NITRO_CMD_DO_SOMETHING_A0, cpu};
-	ret = sendWriteCommand(NITRO_CMD_DO_SOMETHING_A0, 0, 0, cmdDoSomethingA0, sizeof(cmdDoSomethingA0));
+	// Send command A0. (What does it do?)
+	const uint8_t cmd160[] = {160, cpu};
+	ret = sendWriteCommand(160, 0, 0, cmd160, sizeof(cmd160));
 	if (ret < 0)
 		return ret;
 
