@@ -108,12 +108,10 @@ int ISNitro::sendReadCommand(uint16_t cmd, uint8_t _slot, uint32_t address, uint
 	int ret = libusb_bulk_transfer(m_device, BULK_EP_OUT,
 		(uint8_t*)&cdb, (int)sizeof(cdb), &transferred, 1000);
 	if (ret < 0) {
-		printf("A ERR!!!!\n");
 		return ret;
 	}
 	if (transferred != (int)sizeof(cdb)) {
 		// Short write.
-		printf("SHORT WRITE: transferred == %d, len == %d\n", transferred, (int)sizeof(cdb));
 		return LIBUSB_ERROR_TIMEOUT;
 	}
 
@@ -121,13 +119,10 @@ int ISNitro::sendReadCommand(uint16_t cmd, uint8_t _slot, uint32_t address, uint
 	ret = libusb_bulk_transfer(m_device, BULK_EP_IN,
 		data, (int)len, &transferred, 1000);
 	if (ret < 0) {
-		printf("B ERR!!!!\n");
-		printf("transferred == %d, len == %d\n", transferred, (int)len);
 		return ret;
 	}
 	if (transferred != (int)len) {
 		// Short read.
-		printf("SHORT READ: transferred == %d, len == %d\n", transferred, (int)len);
 		return LIBUSB_ERROR_TIMEOUT;
 	}
 
