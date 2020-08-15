@@ -13,6 +13,7 @@
 #include <getopt.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>	// FIXME: usleep() for Windows
 
 // C++ includes. (C namespace)
 #include <cerrno>
@@ -85,8 +86,12 @@ static void print_help(const TCHAR *argv0)
 		"\n"
 		"Supported commands:\n"
 		"\n"
+		"fullreset\n"
+		"- Do a full reset. This clears the first 32 KB of EMULATOR memory, disables\n"
+		"  both slots, and resets the system.\n"
+		"\n"
 		"reset\n"
-		"- Do a full reset. This clears the first 32 KB of EMULATOR memory.\n"
+		"- Do a soft reset. This resets the DS CPU only.\n"
 		"\n"
 		"load filename.nds\n"
 		"- Load a Nintendo DS ROM image. If the image has a decrypted secure area,\n"
@@ -230,12 +235,17 @@ int ORTIN_CDECL _tmain(int argc, TCHAR *argv[])
 		// Display help.
 		print_help(argv[0]);
 		return EXIT_SUCCESS;
-	} else if (!_tcscmp(argv[optind], _T("reset"))) {
-		// Wipe the first 32 KB of EMULATOR memory and reset the system.
+	} else if (!_tcscmp(argv[optind], _T("fullreset"))) {
+		// Full Reset: Wipe the first 32 KB of EMULATOR memory and reset the system.
 		uint8_t *zerobytes = static_cast<uint8_t*>(calloc(1, 32768));
 		nitro->writeEmulationMemory(1, 0, zerobytes, 32768);
 		free(zerobytes);
 		ret = nitro->fullReset();
+	} else if (!_tcscmp(argv[optind], _T("reset"))) {
+		// Reset: Reset the DS CPU only.
+		nitro->ndsReset(true);
+		usleep(500000);
+		ret = nitro->ndsReset(false);
 	} else if (!_tcscmp(argv[optind], _T("load"))) {
 		// Load a ROM image.
 		if (argc < optind+2) {
