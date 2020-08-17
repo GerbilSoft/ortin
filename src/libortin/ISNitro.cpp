@@ -404,22 +404,22 @@ int ISNitro::writeNECMemory(uint32_t address, const uint8_t *data, uint32_t len)
 int ISNitro::unlockAV(void)
 {
 	static const uint8_t cmd1[] = {0x59, 0x00};
-	int ret = writeNECMemory(NITRO_NEC_VIDEO_REG_UNLOCK0, cmd1, sizeof(cmd1));
+	int ret = writeNECMemory(NITRO_NEC_REG_VIDEO_UNLOCK0, cmd1, sizeof(cmd1));
 	if (ret < 0)
 		return ret;
 
 	static const uint8_t cmd2[] = {0x4F, 0x00};
-	ret = writeNECMemory(NITRO_NEC_VIDEO_REG_UNLOCK1, cmd2, sizeof(cmd2));
+	ret = writeNECMemory(NITRO_NEC_REG_VIDEO_UNLOCK1, cmd2, sizeof(cmd2));
 	if (ret < 0)
 		return ret;
 
 	static const uint8_t cmd3[] = {0x4B, 0x00};
-	ret = writeNECMemory(NITRO_NEC_VIDEO_REG_UNLOCK2, cmd3, sizeof(cmd3));
+	ret = writeNECMemory(NITRO_NEC_REG_VIDEO_UNLOCK2, cmd3, sizeof(cmd3));
 	if (ret < 0)
 		return ret;
 
 	static const uint8_t cmd4[] = {0x4F, 0x00};
-	ret = writeNECMemory(NITRO_NEC_VIDEO_REG_UNLOCK3, cmd4, sizeof(cmd4));
+	ret = writeNECMemory(NITRO_NEC_REG_VIDEO_UNLOCK3, cmd4, sizeof(cmd4));
 	return ret;
 }
 
@@ -432,17 +432,17 @@ int ISNitro::unlockAV(void)
 int ISNitro::writeMonitorConfigRegister(uint8_t reg, uint16_t value)
 {
 	const uint8_t cmd1[] = {reg, 0};
-	int ret = writeNECMemory(NITRO_NEC_VIDEO_REG_MONITOR_SEL, cmd1, sizeof(cmd1));
+	int ret = writeNECMemory(NITRO_NEC_REG_MONITOR_SEL, cmd1, sizeof(cmd1));
 	if (ret < 0)
 		return ret;
 
 	const uint8_t cmd2[] = {(uint8_t)(value & 0xFF), 0};
-	ret = writeNECMemory(NITRO_NEC_VIDEO_REG_MONITOR_DATA_LO, cmd2, sizeof(cmd2));
+	ret = writeNECMemory(NITRO_NEC_REG_MONITOR_DATA_LO, cmd2, sizeof(cmd2));
 	if (ret < 0)
 		return ret;
 
 	const uint8_t cmd3[] = {(uint8_t)(value >> 8), 0};
-	return writeNECMemory(NITRO_NEC_VIDEO_REG_MONITOR_DATA_HI, cmd3, sizeof(cmd3));
+	return writeNECMemory(NITRO_NEC_REG_MONITOR_DATA_HI, cmd3, sizeof(cmd3));
 }
 
 /**
@@ -453,17 +453,17 @@ int ISNitro::writeMonitorConfigRegister(uint8_t reg, uint16_t value)
 int ISNitro::setBgColor(uint32_t bg_color)
 {
 	uint8_t cmd[] = {(uint8_t)(bg_color & 0xFF), 0x00};
-	int ret = writeNECMemory(NITRO_NEC_VIDEO_REG_MONITOR_BG_B, cmd, sizeof(cmd));
+	int ret = writeNECMemory(NITRO_NEC_REG_MONITOR_BG_B, cmd, sizeof(cmd));
 	if (ret < 0)
 		return ret;
 	bg_color >>= 8;
 	cmd[0] = (uint8_t)(bg_color & 0xFF);
-	ret = writeNECMemory(NITRO_NEC_VIDEO_REG_MONITOR_BG_G, cmd, sizeof(cmd));
+	ret = writeNECMemory(NITRO_NEC_REG_MONITOR_BG_G, cmd, sizeof(cmd));
 	if (ret < 0)
 		return ret;
 	bg_color >>= 8;
 	cmd[0] = (uint8_t)(bg_color & 0xFF);
-	return writeNECMemory(NITRO_NEC_VIDEO_REG_MONITOR_BG_R, cmd, sizeof(cmd));
+	return writeNECMemory(NITRO_NEC_REG_MONITOR_BG_R, cmd, sizeof(cmd));
 }
 
 /**
@@ -536,7 +536,7 @@ int ISNitro::setAVModeSettings(const NitroAVModeSettings_t *mode)
 				((uint8_t)mode->av[0].mode << 4) |
 				((uint8_t)mode->deflicker << 6);
 	const uint8_t cmd[] = {monitor_state, 0};
-	ret = writeNECMemory(NITRO_NEC_VIDEO_REG_MONITOR_STATE, cmd, sizeof(cmd));
+	ret = writeNECMemory(NITRO_NEC_REG_MONITOR_STATE, cmd, sizeof(cmd));
 	if (ret < 0)
 		return ret;
 
@@ -545,10 +545,10 @@ int ISNitro::setAVModeSettings(const NitroAVModeSettings_t *mode)
 	// X,Y pos are set to 255 to hide the cursor.
 	// FIXME: It doesn't completely hide it... (shows up at the top-right of the screen)
 	uint8_t cmd_cursorPos[] = {0xFF, 0x00};
-	ret = writeNECMemory(NITRO_NEC_VIDEO_REG_CURSOR_POS_X, cmd_cursorPos, sizeof(cmd_cursorPos));
+	ret = writeNECMemory(NITRO_NEC_REG_CURSOR_POS_X, cmd_cursorPos, sizeof(cmd_cursorPos));
 	if (ret < 0)
 		return ret;
-	return writeNECMemory(NITRO_NEC_VIDEO_REG_CURSOR_POS_Y, cmd_cursorPos, sizeof(cmd_cursorPos));
+	return writeNECMemory(NITRO_NEC_REG_CURSOR_POS_Y, cmd_cursorPos, sizeof(cmd_cursorPos));
 }
 
 /**
