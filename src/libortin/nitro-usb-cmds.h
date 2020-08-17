@@ -112,9 +112,12 @@ typedef struct _NitroNECCommand {
 } NitroNECCommand;
 
 /**
- * NEC video registers.
+ * NEC registers.
  */
 typedef enum {
+	NITRO_NEC_NDS_REG0			= 0x08000000,	// See NitroNECNDSReg0_e.
+	NITRO_NEC_NDS_REG1			= 0x08000002,	// See NitroNECNDSReg1_e.
+
 	NITRO_NEC_REG_FORWARD0			= 0x08000004,
 	NITRO_NEC_REG_FORWARD1			= 0x08000006,
 	NITRO_NEC_REG_FORWARD_EN		= 0x08000008,
@@ -148,6 +151,23 @@ typedef enum {
 	NITRO_NEC_REG_MONITOR_DATA_HI		= 0x08000036,
 } NitroNECVideoRegister_e;
 
+/**
+ * NEC NDS register 0 bits.
+ */
+typedef enum {
+	NITRO_NEC_NDS_REG0_DEBUG_BUTTON		= (1U << 0),
+	NITRO_NEC_NDS_REG0_COVER		= (1U << 1),
+	NITRO_NEC_NDS_REG0_RESET		= (1U << 4),
+} NitroNECNDSReg0_e;
+
+/**
+ * NEC NDS register 0 bits.
+ */
+typedef enum {
+	NITRO_NEC_NDS_REG1_WRITE_PROTECTION	= (1U << 0),
+	NITRO_NEC_NDS_REG1_BOOT_COMPLETE	= (1U << 1),
+	NITRO_NEC_NDS_REG1_POWER		= (1U << 4),
+} NitroNECNDSReg1_e;
 /**
  * CPU index.
  */
