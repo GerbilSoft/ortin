@@ -57,16 +57,17 @@ ADD_CUSTOM_TARGET(bins DEPENDS ${h_files})
 # Build the library. #
 ######################
 
-ADD_LIBRARY(ortin STATIC
+ADD_LIBRARY(libortin STATIC
 	${libortin_SRCS} ${libortin_H}
 	)
-ADD_DEPENDENCIES(ortin bins)
+SET_TARGET_PROPERTIES(libortin PROPERTIES OUTPUT_NAME "ortin")
+ADD_DEPENDENCIES(libortin bins)
 
 # Include paths:
 # - Public: Current source and binary directories.
 # - Private: Parent source and binary directories,
 #            and top-level binary directory for git_version.h.
-TARGET_INCLUDE_DIRECTORIES(ortin
+TARGET_INCLUDE_DIRECTORIES(libortin
 	PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>		# libortin
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>		# libortin
 	PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>	# src
@@ -75,15 +76,15 @@ TARGET_INCLUDE_DIRECTORIES(ortin
 	)
 
 # Exclude from ALL builds.
-SET_TARGET_PROPERTIES(ortin PROPERTIES EXCLUDE_FROM_ALL TRUE)
+SET_TARGET_PROPERTIES(libortin PROPERTIES EXCLUDE_FROM_ALL TRUE)
 # Make sure git_version.h is created before compiling this target.
 IF(TARGET git_version)
-	ADD_DEPENDENCIES(ortin git_version)
+	ADD_DEPENDENCIES(libortin git_version)
 ENDIF(TARGET git_version)
 
 # LibUSB is required.
 FIND_PACKAGE(LibUSB 1.0 REQUIRED)
-TARGET_LINK_LIBRARIES(ortin PUBLIC LibUSB::libusb)
+TARGET_LINK_LIBRARIES(libortin PUBLIC LibUSB::libusb)
 
 # Unix: Add -fpic/-fPIC in order to use this static library in plugins.
 IF(UNIX AND NOT APPLE)

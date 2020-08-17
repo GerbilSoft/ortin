@@ -1,13 +1,13 @@
 /***************************************************************************
- * Ortin (IS-NITRO management) (ortintool)                                 *
+ * Ortin (IS-NITRO management) (ortin CLI)                                 *
  * load-rom.hpp: 'load' command.                                           *
  *                                                                         *
  * Copyright (c) 2020 by David Korth.                                      *
  * SPDX-License-Identifier: GPL-2.0-or-later                               *
  ***************************************************************************/
 
-#ifndef __ORTIN_ORTINTOOL_LOAD_ROM_HPP__
-#define __ORTIN_ORTINTOOL_LOAD_ROM_HPP__
+#ifndef __ORTIN_ORTIN_LOAD_ROM_HPP__
+#define __ORTIN_ORTIN_LOAD_ROM_HPP__
 
 #include "tcharx.h"
 
@@ -21,4 +21,4 @@ class ISNitro;
  */
 int load_nds_rom(ISNitro *nitro, const TCHAR *filename);
 
-#endif /* __ORTIN_ORTINTOOL_LOAD_ROM_HPP__ */
+#endif /* __ORTIN_ORTIN_LOAD_ROM_HPP__ */

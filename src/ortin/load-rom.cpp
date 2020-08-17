@@ -1,5 +1,5 @@
 /***************************************************************************
- * Ortin (IS-NITRO management) (ortintool)                                 *
+ * Ortin (IS-NITRO management) (ortin CLI)                                 *
  * load-rom.cpp: 'load' command.                                           *
  *                                                                         *
  * Copyright (c) 2020 by David Korth.                                      *

@@ -6,16 +6,16 @@ IF(POLICY CMP0063)
 	# target types, including static libraries and executables.
 	CMAKE_POLICY(SET CMP0063 NEW)
 ENDIF(POLICY CMP0063)
-PROJECT(ortintool LANGUAGES C CXX)
+PROJECT(ortin LANGUAGES C CXX)
 
 # Sources.
-SET(ortintool_SRCS
+SET(ortin_SRCS
 	main.cpp
 	load-rom.cpp
 	avmode.cpp
 	)
 # Headers.
-SET(ortintool_H
+SET(ortin_H
 	load-rom.hpp
 	avmode.hpp
 	)
@@ -24,31 +24,31 @@ SET(ortintool_H
 # Build the executable. #
 #########################
 
-ADD_EXECUTABLE(ortintool
-	${ortintool_SRCS} ${ortintool_H}
+ADD_EXECUTABLE(ortin
+	${ortin_SRCS} ${ortin_H}
 	)
-SET_TARGET_PROPERTIES(ortintool PROPERTIES PREFIX "")
-DO_SPLIT_DEBUG(ortintool)
-SET_WINDOWS_SUBSYSTEM(ortintool CONSOLE)
-SET_WINDOWS_NO_MANIFEST(ortintool)
+SET_TARGET_PROPERTIES(ortin PROPERTIES PREFIX "")
+DO_SPLIT_DEBUG(ortin)
+SET_WINDOWS_SUBSYSTEM(ortin CONSOLE)
+SET_WINDOWS_NO_MANIFEST(ortin)
 
 # FIXME: setargv isn't necessarily sorted...
 # TODO: Implement our own setargv function?
-SET_WINDOWS_ENTRYPOINT(ortintool wmain ON)
+SET_WINDOWS_ENTRYPOINT(ortin wmain ON)
 
 # Include paths:
 # - Public: Current source and binary directories.
 # - Private: Parent source and binary directories,
 #            and top-level binary directory for git_version.h.
-TARGET_INCLUDE_DIRECTORIES(ortintool
-	PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>		# ortintool
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>		# ortintool
+TARGET_INCLUDE_DIRECTORIES(ortin
+	PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>		# ortin
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>		# ortin
 	PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>	# src
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>	# src
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>			# build
 	)
 
-TARGET_LINK_LIBRARIES(ortintool PRIVATE ortin)
+TARGET_LINK_LIBRARIES(ortin PRIVATE libortin)
 # TODO: getopt_msvc
 #IF(MSVC)
 #	TARGET_LINK_LIBRARIES(ortin PRIVATE getopt_msvc)
@@ -70,7 +70,7 @@ INCLUDE(DirInstallPaths)
 # NOTE: Don't install libraries.
 # That installs the import library, which isn't used
 # for shell extensions.
-INSTALL(TARGETS ortintool
+INSTALL(TARGETS ortin
 	RUNTIME DESTINATION "${DIR_INSTALL_EXE}"
 	LIBRARY DESTINATION "${DIR_INSTALL_DLL}"
 	#ARCHIVE DESTINATION "${DIR_INSTALL_LIB}"
@@ -78,7 +78,7 @@ INSTALL(TARGETS ortintool
 	)
 IF(INSTALL_DEBUG)
 	# FIXME: Generator expression $<TARGET_PROPERTY:${_target},PDB> didn't work with CPack-3.6.1.
-	GET_TARGET_PROPERTY(DEBUG_FILENAME ortintool PDB)
+	GET_TARGET_PROPERTY(DEBUG_FILENAME ortin PDB)
 	INSTALL(FILES "${DEBUG_FILENAME}"
 		DESTINATION "${DIR_INSTALL_EXE_DEBUG}"
 		COMPONENT "debug"

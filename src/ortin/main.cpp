@@ -1,5 +1,5 @@
 /***************************************************************************
- * Ortin (IS-NITRO management) (ortintool)                                 *
+ * Ortin (IS-NITRO management) (ortin CLI)                                 *
  * main.cpp: Command line interface.                                       *
  *                                                                         *
  * Copyright (c) 2020 by David Korth.                                      *

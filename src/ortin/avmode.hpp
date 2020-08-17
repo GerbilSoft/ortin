@@ -1,13 +1,13 @@
 /***************************************************************************
- * Ortin (IS-NITRO management) (ortintool)                                 *
+ * Ortin (IS-NITRO management) (ortin CLI)                                 *
  * avmode.hpp: 'avmode' command.                                           *
  *                                                                         *
  * Copyright (c) 2020 by David Korth.                                      *
  * SPDX-License-Identifier: GPL-2.0-or-later                               *
  ***************************************************************************/
 
-#ifndef __ORTIN_ORTINTOOL_AVMODE_HPP__
-#define __ORTIN_ORTINTOOL_AVMODE_HPP__
+#ifndef __ORTIN_ORTIN_AVMODE_HPP__
+#define __ORTIN_ORTIN_AVMODE_HPP__
 
 #include "tcharx.h"
 #include "nitro-usb-cmds.h"
@@ -27,4 +27,4 @@ class ISNitro;
 int set_av_mode(ISNitro *nitro, const TCHAR *av1, const TCHAR *av2,
 	uint32_t bg_color, NitroAVDeflicker_e deflicker, NitroAVRotation_e rotation);
 
-#endif /* __ORTIN_ORTINTOOL_AVMODE_HPP__ */
+#endif /* __ORTIN_ORTIN_AVMODE_HPP__ */
