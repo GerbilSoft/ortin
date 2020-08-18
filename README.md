@@ -12,7 +12,7 @@ Intelligent Systems IS-NITRO-EMULATOR development kit for Nintendo DS.
 * Set AV mode on all IS-NITRO-EMULATOR systems, including those that don't
   have the Video option enabled.
 * Load a Nintendo DS ROM image. Both encrypted and decrypted ROM images are
-  supported. (Decrypted ROM images will be re-encrypted on the fly.)
+  supported. (Decrypted ROM images are re-encrypted on the fly.)
 * Boot Game Boy Advance cartridges by enabling Slot 2 and resetting the
   system.
 
