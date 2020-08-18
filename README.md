@@ -38,5 +38,5 @@ Intelligent Systems IS-NITRO-EMULATOR development kit for Nintendo DS.
 
 ## References
 
-* [https://nsmbhd.net/thread/4438-nintendo-ds-dev-hardware-is-nitro-emulator-and-co/](The NSMB Hacking Domain: Nintendo DS dev hardware! IS-NITRO-EMULATOR & co.)
-* [https://problemkaputt.de/gbatek.htm](GBATEK) Game Boy Advance and Nintendo DS documentation
+* [The NSMB Hacking Domain: Nintendo DS dev hardware! IS-NITRO-EMULATOR & co.](https://nsmbhd.net/thread/4438-nintendo-ds-dev-hardware-is-nitro-emulator-and-co/)
+* [GBATEK](https://problemkaputt.de/gbatek.htm) Game Boy Advance and Nintendo DS documentation
