@@ -312,6 +312,7 @@ int ISNitro::installDebuggerROM(bool toFirmware)
 	time_t now = time(nullptr);
 	struct tm tm = *localtime(&now);
 	// TODO: Validate fields.
+	// FIXME: Only seems to work the first time the debugger ROM is loaded...
 	hdr[0x218] = DEC_TO_BCD(tm.tm_year - 100);
 	hdr[0x219] = DEC_TO_BCD(tm.tm_mon + 1);
 	hdr[0x21A] = DEC_TO_BCD(tm.tm_mday);
