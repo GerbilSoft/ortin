@@ -15,6 +15,7 @@
 #include <cassert>
 #include <cstring>
 #include <cstdio>
+#include <ctime>
 
 // C++ includes.
 #include <algorithm>
@@ -297,7 +298,35 @@ int ISNitro::writeEmulationMemory(uint8_t _slot, uint32_t address, const uint8_t
 int ISNitro::installDebuggerROM(bool toFirmware)
 {
 	// Debugger ROM is installed at 0xFF80000 in EMULATOR memory.
-	writeEmulationMemory(1, 0xFF80000, debugger_code, sizeof(debugger_code));
+
+	// ROM header and CONF section.
+	uint8_t hdr[0x300];
+	memcpy(hdr, debugger_code, sizeof(hdr));
+
+	// Set the current RTC value.
+	// TODO: Option to set the RTC?
+	// RTC value is at 0x218
+	// - Format (BCD): YY mm dd ?? HH MM ss
+#define DEC_TO_BCD(n) ((((n) / 10) << 4) | ((n) % 10))
+	// TODO: localtime_r() if available.
+	time_t now = time(nullptr);
+	struct tm tm = *localtime(&now);
+	// TODO: Validate fields.
+	hdr[0x218] = DEC_TO_BCD(tm.tm_year - 100);
+	hdr[0x219] = DEC_TO_BCD(tm.tm_mon + 1);
+	hdr[0x21A] = DEC_TO_BCD(tm.tm_mday);
+	hdr[0x21C] = DEC_TO_BCD(tm.tm_hour);
+	hdr[0x21D] = DEC_TO_BCD(tm.tm_min);
+	hdr[0x21E] = DEC_TO_BCD(tm.tm_sec);
+	int ret = writeEmulationMemory(1, 0xFF80000, hdr, sizeof(hdr));
+	if (ret < 0)
+		return ret;
+
+	// Write the rest of the debugger ROM.
+	ret = writeEmulationMemory(1, 0xFF80000+sizeof(hdr),
+		&debugger_code[sizeof(hdr)], sizeof(debugger_code)-sizeof(hdr));
+	if (ret < 0)
+		return ret;
 
 	// Set the ISID in Slot 2.
 	uint8_t isid[1024];
@@ -311,7 +340,9 @@ int ISNitro::installDebuggerROM(bool toFirmware)
 	isid[0x102] = 'I';
 	isid[0x103] = 'D';
 	isid[0x104] = 1;
-	writeEmulationMemory(2, 0, isid, sizeof(isid));
+	ret = writeEmulationMemory(2, 0, isid, sizeof(isid));
+	if (ret < 0)
+		return ret;
 
 	// Overwrite the debugging pointers in the ROM header.
 	const uint32_t debug_ptrs[4] = {
@@ -319,9 +350,9 @@ int ISNitro::installDebuggerROM(bool toFirmware)
 		cpu_to_le32(0x02700000), cpu_to_le32(0x02700004),
 	};
 	if (!toFirmware) {
-		writeEmulationMemory(1, 0x160, (const uint8_t*)debug_ptrs, sizeof(debug_ptrs));
+		ret = writeEmulationMemory(1, 0x160, (const uint8_t*)debug_ptrs, sizeof(debug_ptrs));
 	}
-	return 0;
+	return ret;
 }
 
 /**
