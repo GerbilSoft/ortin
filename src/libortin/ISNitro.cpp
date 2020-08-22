@@ -306,7 +306,8 @@ int ISNitro::installDebuggerROM(bool toFirmware)
 	// Set the current RTC value.
 	// TODO: Option to set the RTC?
 	// RTC value is at 0x218
-	// - Format (BCD): YY mm dd ?? HH MM ss
+	// - Format (BCD): YY mm dd dw HH MM ss
+	// - (dw == day of week; 2 == Tuesday)
 #define DEC_TO_BCD(n) ((((n) / 10) << 4) | ((n) % 10))
 	// TODO: localtime_r() if available.
 	time_t now = time(nullptr);
@@ -316,6 +317,7 @@ int ISNitro::installDebuggerROM(bool toFirmware)
 	hdr[0x218] = DEC_TO_BCD(tm.tm_year - 100);
 	hdr[0x219] = DEC_TO_BCD(tm.tm_mon + 1);
 	hdr[0x21A] = DEC_TO_BCD(tm.tm_mday);
+	hdr[0x21B] = tm.tm_wday;
 	hdr[0x21C] = DEC_TO_BCD(tm.tm_hour);
 	hdr[0x21D] = DEC_TO_BCD(tm.tm_min);
 	hdr[0x21E] = DEC_TO_BCD(tm.tm_sec);
