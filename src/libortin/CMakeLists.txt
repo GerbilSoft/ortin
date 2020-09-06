@@ -22,6 +22,7 @@ SET(libortin_H
 	byteorder.h
 	byteswap.h
 	nitro-usb-cmds.h
+	nds_blowfish.h
 	)
 
 #########
