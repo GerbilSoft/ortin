@@ -235,7 +235,7 @@ int NDSCrypt::encrypt_arm9(uint8_t *data)
 
 	m_arg2[1] <<= 1;
 	m_arg2[2] >>= 1;
-	
+
 	init2(m_card_hash, m_arg2);
 
 	uint32_t size = 0x800 - 8;
@@ -261,7 +261,7 @@ int NDSCrypt::encrypt_arm9(uint8_t *data)
  * @param pRom First 32 KB of the ROM image.
  * @return 0 on success; non-zero on error.
  */
-int encryptSecureArea(uint8_t *pRom)
+static int encryptSecureArea(uint8_t *pRom)
 {
 	static const unsigned int rounds_offsets = 0x1600;
 	static const unsigned int sbox_offsets = 0x1C00;
@@ -287,10 +287,10 @@ int encryptSecureArea(uint8_t *pRom)
 	// Reinitialize the card hash.
 	ndsCrypt.init0();
 	//srand(gamecode);	// FIXME: Is this actually needed?
-	
+
 	// rounds table
 	memcpy(&pRom[rounds_offsets], ndsCrypt.card_hash(), 4*18);
-	
+
 	// S-boxes
 	for (unsigned int i = 0; i < 4; i++) {
 		memcpy(&pRom[sbox_offsets + (4*256*i)], &ndsCrypt.card_hash()[18 + (i*256)], 4*256);
@@ -307,7 +307,7 @@ int encryptSecureArea(uint8_t *pRom)
 	memset(&pRom[0x3C00], 0x55, 0x200);
 	memset(&pRom[0x3E00], 0xAA, 0x200);
 	pRom[0x3FFF] = 0x00;
-	
+
 	// Calculate CRCs and write header.
 	// Secure Area CRC16
 	pRom16[0x6C/2] = cpu_to_le16(CalcCrc16(&pRom[0x4000], 0x4000));
