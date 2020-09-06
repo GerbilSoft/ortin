@@ -268,7 +268,7 @@ static int encryptSecureArea(uint8_t *pRom)
 	static const unsigned int sbox_offsets = 0x1C00;
 
 	// If the ROM is already encrypted, we don't need to do anything.
-	uint32_t *pRom32 = reinterpret_cast<uint32_t*>(pRom);
+	uint32_t *const pRom32 = reinterpret_cast<uint32_t*>(pRom);
 	if (pRom32[0x4000/4] != 0xE7FFDEFF && pRom32[0x4004/4] != 0xE7FFDEFF) {
 		// ROM is already encrypted.
 		return 0;
@@ -279,7 +279,7 @@ static int encryptSecureArea(uint8_t *pRom)
 	ndsCrypt.encrypt_arm9(&pRom[0x4000]);
 
 	// Calculate CRCs.
-	uint16_t *pRom16 = reinterpret_cast<uint16_t*>(pRom);
+	uint16_t *const pRom16 = reinterpret_cast<uint16_t*>(pRom);
 	// Secure Area CRC16
 	pRom16[0x6C/2] = cpu_to_le16(CalcCrc16(&pRom[0x4000], 0x4000));
 	// Header CRC16
@@ -333,4 +333,43 @@ int ndscrypt_encrypt_secure_area(uint8_t *pRom, size_t len)
 		return -EINVAL;
 
 	return encryptSecureArea(pRom);
+}
+
+/**
+ * Decrypt the secure area and remove the static data.
+ * @param pRom First 32 KB of the ROM image.
+ * @return 0 on success; non-zero on error.
+ */
+static int decryptSecureArea(uint8_t *pRom)
+{
+	// If the ROM is already decrypted, we don't need to do anything.
+	uint32_t *const pRom32 = reinterpret_cast<uint32_t*>(pRom);
+	if (pRom32[0x4000/4] == 0xE7FFDEFF && pRom32[0x4004/4] == 0xE7FFDEFF) {
+		// ROM is already decrypted.
+		return 0;
+	}
+
+	uint32_t gamecode = le32_to_cpu(pRom32[0x0C/4]);
+	NDSCrypt ndsCrypt(gamecode);
+	ndsCrypt.decrypt_arm9(&pRom[0x4000]);
+
+	// Zero out the static data.
+	memset(&pRom[0x1000], 0, 0x3000);
+	return 0;
+}
+
+/**
+ * Decrypt the ROM's Secure Area, if necessary.
+ * @param pRom First 32 KB of the ROM image.
+ * @param len Length of pRom.
+ * @return 0 on success; non-zero on error.
+ */
+int ndscrypt_decrypt_secure_area(uint8_t *pRom, size_t len)
+{
+	assert(len >= 32768);
+	if (len < 32768)
+		return -EINVAL;
+
+	// Decrypt the Secure Area.
+	return decryptSecureArea(pRom);
 }

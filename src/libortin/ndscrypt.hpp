@@ -24,6 +24,14 @@ extern "C" {
  */
 int ndscrypt_encrypt_secure_area(uint8_t *pRom, size_t len);
 
+/**
+ * Decrypt the ROM's Secure Area, if necessary.
+ * @param pRom First 32 KB of the ROM image.
+ * @param len Length of pRom.
+ * @return 0 on success; non-zero on error.
+ */
+int ndscrypt_decrypt_secure_area(uint8_t *pRom, size_t len);
+
 #ifdef __cplusplus
 }
 #endif
