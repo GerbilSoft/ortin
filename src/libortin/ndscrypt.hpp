@@ -22,7 +22,7 @@ extern "C" {
  * @param len Length of pRom.
  * @return 0 on success; non-zero on error.
  */
-int ndscrypt_secure_area(uint8_t *pRom, size_t len);
+int ndscrypt_encrypt_secure_area(uint8_t *pRom, size_t len);
 
 #ifdef __cplusplus
 }

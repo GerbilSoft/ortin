@@ -74,7 +74,7 @@ int load_nds_rom(ISNitro *nitro, const TCHAR *filename)
 
 		if (firstMB) {
 			// We may need to encrypt the secure area.
-			ndscrypt_secure_area(buf1mb, curlen);
+			ndscrypt_encrypt_secure_area(buf1mb, curlen);
 			firstMB = false;
 		}
 
