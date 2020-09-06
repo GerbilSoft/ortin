@@ -166,7 +166,7 @@ void NDSCrypt::init2(uint32_t *magic, uint32_t a[3])
 
 void NDSCrypt::init1(void)
 {
-	memcpy(m_card_hash, &encr_data, 4*(1024 + 18));
+	memcpy(m_card_hash, &nds_blowfish_data, 4*(1024 + 18));
 	m_arg2[0] = m_gamecode;
 	m_arg2[1] = m_gamecode >> 1;
 	m_arg2[2] = m_gamecode << 1;
