@@ -267,7 +267,7 @@ static int encryptSecureArea(uint8_t *pRom)
 	static const unsigned int rounds_offsets = 0x1600;
 	static const unsigned int sbox_offsets = 0x1C00;
 
-	// If ROM is already encrypted, we don't need to do anything.
+	// If the ROM is already encrypted, we don't need to do anything.
 	uint32_t *pRom32 = reinterpret_cast<uint32_t*>(pRom);
 	if (pRom32[0x4000/4] != 0xE7FFDEFF && pRom32[0x4004/4] != 0xE7FFDEFF) {
 		// ROM is already encrypted.
