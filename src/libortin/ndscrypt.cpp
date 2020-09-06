@@ -257,7 +257,8 @@ int NDSCrypt::encrypt_arm9(uint8_t *data)
 }
 
 /**
- * Create encryption data required for official flash carts and IS-NITRO.
+ * Encrypt the secure area and create the encryption data
+ * required for official flash carts and IS-NITRO.
  * @param pRom First 32 KB of the ROM image.
  * @return 0 on success; non-zero on error.
  */
