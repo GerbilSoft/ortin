@@ -7,6 +7,9 @@
 Ortin is a utility based on reverse-engineered documentation for the
 Intelligent Systems IS-NITRO-EMULATOR development kit for Nintendo DS.
 
+Portions of Ortin are based on [NitroDriver](https://github.com/Dirbaio/NitroDriver)
+by Dirbaio.
+
 ## Features
 
 * Set AV mode on all IS-NITRO-EMULATOR systems, including those that don't
@@ -40,3 +43,4 @@ Intelligent Systems IS-NITRO-EMULATOR development kit for Nintendo DS.
 
 * [The NSMB Hacking Domain: Nintendo DS dev hardware! IS-NITRO-EMULATOR & co.](https://nsmbhd.net/thread/4438-nintendo-ds-dev-hardware-is-nitro-emulator-and-co/)
 * [GBATEK](https://problemkaputt.de/gbatek.htm) Game Boy Advance and Nintendo DS documentation
+* [NitroDriver](https://github.com/Dirbaio/NitroDriver) by Dirbaio
